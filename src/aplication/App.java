@@ -5,6 +5,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import db.DB;
+import db.DbIntegrityException;
+
 
 public class App {
 
@@ -12,30 +14,24 @@ public class App {
 
 		Connection conn = null;
 		PreparedStatement st = null;
+		
 		try {
+			
 			conn = DB.getConnection();
-			st = conn.prepareStatement(
-					"UPDATE seller " + "SET BaseSalary = BaseSalary + ? " + "WHERE (DepartmentId = ?)");
-
-			st.setDouble(1, 20000.00);
-			st.setInt(2, 2);
+			st = conn.prepareStatement("DELETE from department WHERE Id = ?");
 			
+			st.setInt(1, 2);
+			int linhasAfetadas = st.executeUpdate();
+			System.out.println("linhas afetadas = "+ linhasAfetadas);
 			
-			int linhasAlteradas = st.executeUpdate();
-
-			if (linhasAlteradas > 0) {
-				System.out.println("Atualizado " + linhasAlteradas + " empregados  ");
-			} else {
-				System.out.println("Nenhum salário foi atualizado!");
-			}
-
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
+		}catch(SQLException e) {
+			throw new DbIntegrityException(e.getMessage());
+		}finally {
+			
 			DB.closeStatement(st);
 			DB.closeConnection();
 		}
-
+		
 	}
 
 }
